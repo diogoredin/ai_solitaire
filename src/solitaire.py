@@ -17,6 +17,7 @@ class sol_state():
 	def get_board(self):
 		return self.board
 
+	# TODO less than method used for A* and other methods
 	def __lt__(self, otherState):
 		return 0
 
@@ -112,11 +113,14 @@ def move_final(move):
 def board_solved(board):
 	'''Given a board finds if the board is solved.'''
 
+	# Counter
+	counter = 0
+
 	# Iterate the board
 	for line in range(len(board)):
+
 		for column in range(len(board[line])):
 
-			counter = 0
 			if is_peg(board[line][column]):
 				counter += 1
 				if counter > 1:
