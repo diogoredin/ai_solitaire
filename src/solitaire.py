@@ -6,10 +6,10 @@ from search import *
 #
 ##############################################################
 
-class sg_state():
+class sol_state():
 	'''Represents a solitaire board.'''
 
-	__slots__ = ('board',)
+	__slots__ = ('board')
 
 	def __init__(self, board):
 		self.board = board
@@ -17,25 +17,29 @@ class sg_state():
 	def get_board(self):
 		return self.board
 
-	def __lt__(self, otherState):
+	def __lt__(self, other_state):
 		return 0
 
 class solitaire(Problem):
 	'''Models a Solitaire problem as a satisfaction problem.
 		A solution can only have one piece left in the board.'''
 
-	# Save the initial state of the board
+	# State of the board
 	def __init__(self, board):
-		super().__init__(sg_state(board))
+		super().__init__(sol_state(board))
 
-	# For the current state of the board retrieves a list of possible actions
+	# Retrieves a list of possible actions for the current board
 	def actions(self, state):
 		actions = list(filter(lambda x: len(x) > 1, board_moves(state.get_board())))
 		return actions
 
-	# Make the move in the board
+	# Make the specified move in the board
 	# def result(self, state, move):
 		# return sg_state(board_perform_move(state.get_board(), move))
+
+	# def goal_test(self, state)
+	# def path_cost(self, c, state1, action, state2)
+	# def h(self, node)
 
 ##############################################################
 #
@@ -94,7 +98,7 @@ def move_final(move):
 
 ##############################################################
 #
-#	HEURISTIC AUX FUNCTION
+#	BOARD MOVES - Function for solitaire class
 #
 ##############################################################
 
@@ -143,12 +147,12 @@ def board_moves(board):
 
 ##############################################################
 #
-#	HEURISTIC AUX FUNCTION
+#	BOARD PERFORM MOVE - Function for solitaire class
 #
 ##############################################################
 
 def board_perform_move(board, move):
-	'''Given a board and a move performs the move on the given board and return the changed board.'''
+	'''Given a board and a move performs the move on the given board and returns the changed board.'''
 
 ##############################################################
 #
