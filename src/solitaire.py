@@ -9,12 +9,16 @@ from search import *
 class sol_state():
 	'''Represents a solitaire board.'''
 
-	__slots__ = ('board')
+	__slots__ = ('board',)
 
 	def __init__(self, board):
 		self.board = board
 
-	#def __lt__(self, other_state):
+	def get_board(self):
+		return self.board
+
+	def __lt__(self, otherState):
+		return 0
 
 class solitaire(Problem):
 	'''Models a Solitaire problem as a satisfaction problem.
@@ -37,8 +41,12 @@ class solitaire(Problem):
 	def goal_test(self, state):
 		return board_solved(state.get_board())
 
+	# Heuristic (number of nodes available)
+	def h(self, peg):
+		return len(board_moves(peg.state.get_board()))
+
+	# Path cost
 	# def path_cost(self, c, state1, action, state2)
-	# def h(self, node)
 
 ##############################################################
 #
@@ -135,7 +143,7 @@ def board_moves(board):
 			# If the position contains a piece calculate possible moves here
 			if is_peg(board[line][column]):
 
-				if ( line+1 < len(board) ):
+				if ( line+2 < len(board) ):
 
 					# Top
 					if ( is_peg(board[line+1][column]) and is_empty(board[line+2][column]) ):
@@ -156,7 +164,7 @@ def board_moves(board):
 						left = make_move(make_pos(line,column), make_pos(line, column-2))
 						moves.append(left)
 
-				if ( column+1 < len(board[line]) ):
+				if ( column+2 < len(board[line]) ):
 
 					# Right
 					if ( is_peg(board[line][column+1]) and is_empty(board[line][column+2]) ):
@@ -196,11 +204,11 @@ def board_perform_move(board, move):
 
 	return board
 
-##############################################################
-#
-#	MAIN
-#
-##############################################################
+# ##############################################################
+# #
+# #	MAIN
+# #
+# ##############################################################
 
 if (__name__ == "__main__"):
 
