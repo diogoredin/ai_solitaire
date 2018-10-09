@@ -216,18 +216,18 @@ def board_moves(board):
 def board_perform_move(board, move):
 	'''Given a board and a move performs the move on the given board and returns the changed board.'''
 
-	# Initial
-	initial = move_initial(move)
-	final = move_final(move)
+	# Movement Positions
+	pos_initial = move_initial(move)
+	pos_final = move_final(move)
 
 	# Empty first position
-	pos_put(board, initial, c_empty())
+	put_pos(board, pos_initial, c_empty())
 
 	# Empty middle position
-	mid = mid_pos(initial, final)
-	pos_put(board, mid, c_empty())
+	pos_mid = mid_pos(pos_initial, pos_final)
+	put_pos(board, pos_mid, c_empty())
 
-	# Fill final piece
-	pos_put(board, final, c_peg())
+	# Fill pos_final piece
+	put_pos(board, pos_final, c_peg())
 
 	return board
