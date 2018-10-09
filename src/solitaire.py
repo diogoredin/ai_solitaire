@@ -202,41 +202,5 @@ def board_perform_move(board, move):
 	column = pos_c(final)
 	board[line][column] = c_peg()
 
-	return board
-
-# ##############################################################
-# #
-# #	MAIN
-# #
-# ##############################################################
-
-if (__name__ == "__main__"):
-
-	file = open("example1.in", "r")
-
-	contents = file.read()
-	length = len(contents)
-	board = []
-	row = []
-
-	for i in range(length):
-		if (contents.startswith("X",i, i+1)):
-			row.append(c_blocked())
-		if (contents.startswith("O", i, i+1)):
-			row.append(c_peg())
-		if (contents.startswith("_",i, i+1)):
-			row.append(c_empty())
-		if	(contents.startswith("],",i, i+2)):
-			board.append(row)
-			row = []
-		if	(contents.startswith("]]",i, i+2)):
-			board.append(row)
-
-	print("Initial board:")
-	print(board)
-
 	print("Possible moves:")
-	print(board_moves(board))
-
-	print("Result of the first possible move:")
-	print(board_perform_move(board, board_moves(board)[0]))
+	return board

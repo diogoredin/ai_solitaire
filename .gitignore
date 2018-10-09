@@ -5,3 +5,5 @@
 .settings/
 bin/
 *.vscode
+tests_statistics/.DS_Store
+tests_statistics/.DS_Store
