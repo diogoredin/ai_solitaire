@@ -1,2 +1,7 @@
 
 *.pyc
+.DS_Store
+*.log
+.settings/
+bin/
+*.vscode
