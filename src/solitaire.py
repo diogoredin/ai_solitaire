@@ -202,5 +202,4 @@ def board_perform_move(board, move):
 	column = pos_c(final)
 	board[line][column] = c_peg()
 
-	print("Possible moves:")
 	return board
