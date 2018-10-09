@@ -14,11 +14,7 @@ class sol_state():
 	def __init__(self, board):
 		self.board = board
 
-	def get_board(self):
-		return self.board
-
-	def __lt__(self, other_state):
-		return 0
+	#def __lt__(self, other_state):
 
 class solitaire(Problem):
 	'''Models a Solitaire problem as a satisfaction problem.
@@ -33,11 +29,14 @@ class solitaire(Problem):
 		actions = list(filter(lambda x: len(x) > 1, board_moves(state.get_board())))
 		return actions
 
-	# Make the specified move in the board
+	# Make the specified move in the bdioard
 	def result(self, state, move):
 		return sol_state(board_perform_move(state.get_board(), move))
 
-	# def goal_test(self, state)
+	# Return true if we reached our goal
+	def goal_test(self, state):
+		return board_solved(state.get_board())
+
 	# def path_cost(self, c, state1, action, state2)
 	# def h(self, node)
 
@@ -95,6 +94,27 @@ def move_initial(move):
 
 def move_final(move):
 	return move[1]
+
+##############################################################
+#
+#	BOARD SOLVED - Checks if the board is solved.
+#
+##############################################################
+
+def board_solved(board):
+	'''Given a board finds if the board is solved.'''
+
+	# Iterate the board
+	for line in range(len(board)):
+		for column in range(len(board[line])):
+
+			counter = 0
+			if is_peg(board[line][column]):
+				counter += 1
+				if counter > 1:
+					return False
+
+	return True
 
 ##############################################################
 #
@@ -193,11 +213,11 @@ if (__name__ == "__main__"):
 
 	for i in range(length):
 		if (contents.startswith("X",i, i+1)):
-			row.append("X")
+			row.append(c_blocked())
 		if (contents.startswith("O", i, i+1)):
-			row.append("O")
+			row.append(c_peg())
 		if (contents.startswith("_",i, i+1)):
-			row.append("_")
+			row.append(c_empty())
 		if	(contents.startswith("],",i, i+2)):
 			board.append(row)
 			row = []
