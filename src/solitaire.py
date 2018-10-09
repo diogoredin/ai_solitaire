@@ -88,6 +88,22 @@ def pos_l(pos):
 def pos_c(pos):
 	return pos[1]
 
+# Returns the content of the position "pos" of the board
+def get_pos(board, pos):
+	return board[pos_l(pos)][pos_c(pos)]
+
+# Puts the content in the position "pos" of the board
+def put_pos(board, pos, content):
+	board[pos_l(pos)][pos_c(pos)] = content
+
+# Returns the position between the two positions (if there is one)
+def mid_pos(pos_i, pos_j):
+	mid_line = int((pos_l(pos_j) - pos_l(pos_i)) / 2)
+	mid_column = int((pos_c(pos_j) - pos_c(pos_j)) / 2)
+
+	if (-1 <= mid_line <= 1) and (-1 <= mid_column <= 1):
+		return make_pos(mid_line + pos_l(pos_i), mid_column + pos_c(pos_i))
+
 ##############################################################
 #
 #	MOVE METHODS ([p_initial, p_final])
@@ -117,11 +133,11 @@ def board_solved(board):
 	counter = 0
 
 	# Iterate the board
-	for line in range(len(board)):
+	for line in range (len(board)):
 
-		for column in range(len(board[line])):
-
-			if is_peg(board[line][column]):
+		for column in range (len(board[line])):
+			pos = make_pos(line, column)
+			if is_peg (get_pos(board, pos)):
 				counter += 1
 				if counter > 1:
 					return False
@@ -145,34 +161,48 @@ def board_moves(board):
 		for column in range(len(board[line])):
 
 			# If the position contains a piece calculate possible moves here
-			if is_peg(board[line][column]):
+			pos_initial = make_pos(line, column)
 
-				if ( line+2 < len(board) ):
+			if is_peg(get_pos(board, pos_initial)):
 
-					# Top
-					if ( is_peg(board[line+1][column]) and is_empty(board[line+2][column]) ):
-						top = make_move(make_pos(line,column), make_pos(line+2, column))
-						moves.append(top)
+				if ( line < len(board) - 2):
 
-				if ( line-1 > 0 ):
+					# Upward Movement
+					pos_middle = make_pos(pos_l(pos_initial) + 1, pos_c(pos_initial))
+					pos_final = make_pos(pos_l(pos_initial) + 2, pos_c(pos_initial))
 
-					# Bottom
-					if ( is_peg(board[line-1][column]) and is_empty(board[line-2][column]) ):
-						bottom = make_move(make_pos(line,column), make_pos(line-2, column))
-						moves.append(bottom)
+					if ( is_peg(get_pos(board, pos_middle)) and is_empty(get_pos(board, pos_final)) ):
+						upward = make_move(pos_initial, pos_final)
+						moves.append(upward)
 
-				if ( column-1 > 0 ):
+				if ( line > 1 ):
 
-					# Left
-					if ( is_peg(board[line][column-1]) and is_empty(board[line][column-2]) ):
-						left = make_move(make_pos(line,column), make_pos(line, column-2))
+					# Downward Movement
+					pos_middle = make_pos(pos_l(pos_initial) - 1, pos_c(pos_initial))
+					pos_final = make_pos(pos_l(pos_initial) - 2, pos_c(pos_initial))
+
+					if ( is_peg(get_pos(board, pos_middle)) and is_empty(get_pos(board, pos_final)) ):
+						downward = make_move(pos_initial, pos_final)
+						moves.append(downward)
+
+				if ( column > 1 ):
+
+					# Left Movement
+					pos_middle = make_pos(pos_l(pos_initial), pos_c(pos_initial) - 1)
+					pos_final = make_pos(pos_l(pos_initial), pos_c(pos_initial) - 2)
+
+					if ( is_peg(get_pos(board, pos_middle)) and is_empty(get_pos(board, pos_final)) ):
+						left = make_move(pos_initial, pos_final)
 						moves.append(left)
 
-				if ( column+2 < len(board[line]) ):
+				if ( column < len(board[line]) - 2 ):
 
-					# Right
-					if ( is_peg(board[line][column+1]) and is_empty(board[line][column+2]) ):
-						right = make_move(make_pos(line,column), make_pos(line, column+2))
+					pos_middle = make_pos(pos_l(pos_initial), pos_c(pos_initial) + 1)
+					pos_final = make_pos(pos_l(pos_initial), pos_c(pos_initial) + 2)
+
+					# Right Movement
+					if ( is_peg(get_pos(board, pos_middle)) and is_empty(get_pos(board, pos_final)) ):
+						right = make_move(pos_initial, pos_final)
 						moves.append(right)
 	
 	return moves
@@ -191,19 +221,13 @@ def board_perform_move(board, move):
 	final = move_final(move)
 
 	# Empty first position
-	line = pos_l(initial)
-	column = pos_c(initial)
-	board[line][column] = c_empty()
+	pos_put(board, initial, c_empty())
 
 	# Empty middle position
-	mid_line = int((pos_l(final) - pos_l(initial)) / 2)
-	mid_column = int((pos_c(final) - pos_c(initial)) / 2)
-	mid_pos = make_pos(mid_line + pos_l(initial), mid_column + pos_c(initial))
-	board[pos_l(mid_pos)][pos_c(mid_pos)] = c_empty()
+	mid = mid_pos(initial, final)
+	pos_put(board, mid, c_empty())
 
 	# Fill final piece
-	line = pos_l(final)
-	column = pos_c(final)
-	board[line][column] = c_peg()
+	pos_put(board, final, c_peg())
 
 	return board
