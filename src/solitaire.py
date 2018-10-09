@@ -34,8 +34,8 @@ class solitaire(Problem):
 		return actions
 
 	# Make the specified move in the board
-	# def result(self, state, move):
-		# return sg_state(board_perform_move(state.get_board(), move))
+	def result(self, state, move):
+		return sol_state(board_perform_move(state.get_board(), move))
 
 	# def goal_test(self, state)
 	# def path_cost(self, c, state1, action, state2)
@@ -119,28 +119,28 @@ def board_moves(board):
 
 					# Top
 					if ( is_peg(board[line+1][column]) and is_empty(board[line+2][column]) ):
-						top = make_move([line,column], [line+2, column])
+						top = make_move(make_pos(line,column), make_pos(line+2, column))
 						moves.append(top)
 
 				if ( line-1 > 0 ):
 
 					# Bottom
 					if ( is_peg(board[line-1][column]) and is_empty(board[line-2][column]) ):
-						bottom = make_move([line,column], [line-2, column])
+						bottom = make_move(make_pos(line,column), make_pos(line-2, column))
 						moves.append(bottom)
 
 				if ( column-1 > 0 ):
 
 					# Left
 					if ( is_peg(board[line][column-1]) and is_empty(board[line][column-2]) ):
-						left = make_move([line,column], [line, column-2])
+						left = make_move(make_pos(line,column), make_pos(line, column-2))
 						moves.append(left)
 
 				if ( column+1 < len(board[line]) ):
 
 					# Right
 					if ( is_peg(board[line][column+1]) and is_empty(board[line][column+2]) ):
-						right = make_move([line,column], [line, column+2])
+						right = make_move(make_pos(line,column), make_pos(line, column+2))
 						moves.append(right)
 	
 	return moves
@@ -153,6 +153,28 @@ def board_moves(board):
 
 def board_perform_move(board, move):
 	'''Given a board and a move performs the move on the given board and returns the changed board.'''
+
+	# Initial
+	initial = move_initial(move)
+	final = move_final(move)
+
+	# Empty first position
+	line = pos_l(initial)
+	column = pos_c(initial)
+	board[line][column] = c_empty()
+
+	# Empty middle position
+	mid_line = int((pos_l(final) - pos_l(initial)) / 2)
+	mid_column = int((pos_c(final) - pos_c(initial)) / 2)
+	mid_pos = make_pos(mid_line + pos_l(initial), mid_column + pos_c(initial))
+	board[pos_l(mid_pos)][pos_c(mid_pos)] = c_empty()
+
+	# Fill final piece
+	line = pos_l(final)
+	column = pos_c(final)
+	board[line][column] = c_peg()
+
+	return board
 
 ##############################################################
 #
@@ -187,3 +209,6 @@ if (__name__ == "__main__"):
 
 	print("Possible moves:")
 	print(board_moves(board))
+
+	print("Result of the first possible move:")
+	print(board_perform_move(board, board_moves(board)[0]))
