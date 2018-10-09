@@ -1,16 +1,7 @@
 from search import *
 
 ##############################################################
-#	
-#	SAME GAME https://goo.gl/ta5CNq
-#	IST IA 17/18 - GROUP TG028 DIOGO VILELA 84710, DIOGO REDIN 84711
 #
-#	SameGame is played on a board with colored pieces randomly placed. 
-# 	By selecting a group pieces of the same color,they can be removed 
-# 	from the field. Pieces that are no longer supported will fall down, 
-# 	and a column without blocks will be  trimmed by other columns that 
-# 	always slide to one side. The goal of this variant to remove all 
-# 	pieces from the board.
 #
 ##############################################################
 
