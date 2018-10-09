@@ -2,11 +2,12 @@ from search import *
 
 ##############################################################
 #
+#	SOLITAIRE SOLVER
 #
 ##############################################################
 
 class sg_state():
-	'''Represents a same game board.'''
+	'''Represents a solitaire board.'''
 
 	__slots__ = ('board',)
 
@@ -19,48 +20,46 @@ class sg_state():
 	def __lt__(self, otherState):
 		return 0
 
-##############################################################
-#
-#	SAME GAME SOLVER
-#
-##############################################################
+class solitaire(Problem):
+	'''Models a Solitaire problem as a satisfaction problem.
+		A solution can only have one piece left in the board.'''
 
-class same_game(Problem):
-	'''Models a same game problem as a satisfaction problem.
-		A solution cannot have pieces left on the board.'''
-
+	# Save the initial state of the board
 	def __init__(self, board):
 		super().__init__(sg_state(board))
 
+	# For the current state of the board retrieves a list of possible actions
 	def actions(self, state):
-		actions = list(filter(lambda x: len(x) > 1,
-                        board_find_groups(state.get_board())))
+		actions = list(filter(lambda x: len(x) > 1, board_moves(state.get_board())))
 		return actions
 
-	def result(self, state, action):
-		return sg_state(board_remove_group(state.get_board(), action))
-
-	# Tests if the cell is filled or not
-	def goal_test(self, state):
-		return state.get_board()[-1][0] == 0
-
-	def h(self, node):
-		return len(board_find_groups(node.state.get_board()))
+	# Make the move in the board
+	# def result(self, state, move):
+		# return sg_state(board_perform_move(state.get_board(), move))
 
 ##############################################################
 #
-#	COLOR METHODS
+#	CONTENT METHODS
 #
 ##############################################################
 
-def get_no_color():
-	return 0
+def c_peg():
+	return "O"
 
-def no_color(c):
-	return c == 0
+def c_empty():
+	return "_"
 
-def color(c):
-	return c > 0
+def c_blocked():
+	return "X"
+
+def is_empty(e):
+	return e == c_empty()
+
+def is_peg(e):
+	return e == c_peg()
+
+def is_blocked(e):
+	return e == c_blocked()
 
 ##############################################################
 #
@@ -79,124 +78,19 @@ def pos_c(pos):
 
 ##############################################################
 #
-#	HEURISTIC AUX FUNCTION
+#	MOVE METHODS ([p_initial, p_final])
+#	p_initial and p_final are tuples
 #
 ##############################################################
 
-def board_find_groups(board):
-	'''Finds groups of blocks with the same colors. Pieces are
-	considered a group when they are placed on top, left, right or bottom.
-	Pieces on the diagonal aren't considered as being on the same group.'''
+def make_move(i, f):
+	return [i, f]
 
-	# Contains the number of lines and columns on a board
-	numLines = len(board)
-	numColumns = len(board[0])
+def move_initial(move):
+	return move[0]
 
-	# Groups found throughout the board
-	numGroups = 0
-	groups = []
-
-	# Starts by iterating over each line. We start by grouping the groups found on a line
-	# and only on the line below we join the group with existing groups.
-	for lineIndex in range(numLines):
-
-		# Stores the groups found and the number of groups in this line
-		# An element in lineGroups has the form [indexOftheGroup, numGroupsInLine, color, (line, column)]
-		lineGroups = []
-		numGroupsInLine = 0
-
-		# We always add the first element of a line (column = 0)
-		lineGroups.append(
-			[numGroups, numGroupsInLine, board[lineIndex][0], [], [], (lineIndex, 0)])
-
-		# We added the first one so the number of groups incereased
-		numGroups += 1
-		numGroupsInLine += 1
-
-		# We go through every element of the current line
-		for columnIndex in range(1, numColumns):
-
-			# Check if the element before (<-) has the same color
-			if board[lineIndex][columnIndex - 1] == board[lineIndex][columnIndex]:
-				lineGroups[-1].append((lineIndex, columnIndex))
-
-			# If it doesn't we have a new group with a different color and the number of groups increased
-			else:
-				lineGroups.append([numGroups, numGroupsInLine, board[lineIndex]
-                                    [columnIndex], [], [], (lineIndex, columnIndex)])
-				numGroups += 1
-				numGroupsInLine += 1
-
-		# Adds the groups in this line to the total
-		groups.append(lineGroups)
-
-	# Goes through the groups found in each line to group current and bottom
-	# This stracture has the form [[indexOftheGroup, numGroupsInLine, color, (line, column), (line, column)], ...] ...]]
-	for lineIndex in range(len(groups) - 1):
-
-		# Position from where we start on a line
-		columnIndex = 0
-
-		# Position from where we start on current and bottom line
-		currentGroupIndexLine = 0
-		downGroupIndexLine = 0
-
-		# While we have columns to go thorugh on our list
-		while columnIndex < numColumns:
-
-			# Current line group and right on bottom group
-			currentGroup = groups[lineIndex][currentGroupIndexLine]
-			downGroup = groups[lineIndex + 1][downGroupIndexLine]
-
-			# Checks if the color is the same
-			if currentGroup[2] == downGroup[2]:
-
-				# Re-assigns index of the group
-				recursiveUpdate(downGroup, currentGroup[0], groups)
-				recursiveUpdate(currentGroup, currentGroup[0], groups)
-				downGroup[3].append((lineIndex, currentGroupIndexLine))
-				currentGroup[4].append((lineIndex + 1, downGroupIndexLine))
-
-				# Checks wether to process the current or bottom
-				if pos_c(downGroup[-1]) < pos_c(currentGroup[-1]):
-					downGroupIndexLine += 1
-					columnIndex = pos_c(downGroup[-1]) + 1
-
-				elif pos_c(downGroup[-1]) > pos_c(currentGroup[-1]):
-					currentGroupIndexLine += 1
-					columnIndex = pos_c(currentGroup[-1]) + 1
-
-				else:
-					downGroupIndexLine += 1
-					currentGroupIndexLine += 1
-					columnIndex = pos_c(downGroup[-1]) + 1
-
-			else:
-				columnIndex += 1
-
-				if pos_c(downGroup[-1]) < columnIndex:
-					downGroupIndexLine += 1
-
-				if pos_c(currentGroup[-1]) < columnIndex:
-					currentGroupIndexLine += 1
-
-	# Concatenates Groups
-	groupsDict = {}
-	for line in groups:
-
-		for group in line:
-
-			if group[0] in groupsDict:
-				groupsDict[group[0]].extend(group[5:])
-			else:
-				groupsDict[group[0]] = group[5:]
-
-	finalGroups = []
-	for group in groupsDict:
-		if board[groupsDict[group][0][0]][groupsDict[group][0][1]]:
-			finalGroups.append(groupsDict[group])
-
-	return finalGroups
+def move_final(move):
+	return move[1]
 
 ##############################################################
 #
@@ -204,45 +98,88 @@ def board_find_groups(board):
 #
 ##############################################################
 
+def board_moves(board):
+	'''Given a board finds all the ortogonal possible moves. It is returned as a list of moves.'''
 
-def board_remove_group(board, group):
-	'''Given a found grup of pieces removes it from the board.'''
+	# Possible moves on the board
+	moves = []
 
-	# Remove the top ones first
-	group = sorted(group, key=lambda pos: pos_l(pos))
+	# Iterate the board
+	for line in range(len(board)):
+		for column in range(len(board[line])):
 
-	numLines = len(board)
-	numColumns = len(board[0])
-	boardCopy = [[i for i in line] for line in board]
+			# If the position contains a piece calculate possible moves here
+			if is_peg(board[line][column]):
 
-	# Doesnt change the original board
-	for pos in group:
+				if ( line+1 < len(board) ):
 
-		line = pos_l(pos)
-		column = pos_c(pos)
-		boardCopy[line][column] = get_no_color()
-		line -= 1
+					# Top
+					if ( is_peg(board[line+1][column]) and is_empty(board[line+2][column]) ):
+						top = make_move([line,column], [line+2, column])
+						moves.append(top)
 
-		while line >= 0 and color(boardCopy[line][column]):
-			boardCopy[line + 1][column] = boardCopy[line][column]
-			line -= 1
+				if ( line-1 > 0 ):
 
-		boardCopy[line + 1][column] = 0
+					# Bottom
+					if ( is_peg(board[line-1][column]) and is_empty(board[line-2][column]) ):
+						bottom = make_move([line,column], [line-2, column])
+						moves.append(bottom)
 
-	for column in range(numColumns - 2, -1, -1):
+				if ( column-1 > 0 ):
 
-		if not boardCopy[numLines - 1][column]:
+					# Left
+					if ( is_peg(board[line][column-1]) and is_empty(board[line][column-2]) ):
+						left = make_move([line,column], [line, column-2])
+						moves.append(left)
 
-			for line in range(0, numLines):
-				boardCopy[line].pop(column)
-				boardCopy[line].append(0)
+				if ( column+1 < len(board[line]) ):
 
-	return boardCopy
+					# Right
+					if ( is_peg(board[line][column+1]) and is_empty(board[line][column+2]) ):
+						right = make_move([line,column], [line, column+2])
+						moves.append(right)
+	
+	return moves
 
+##############################################################
+#
+#	HEURISTIC AUX FUNCTION
+#
+##############################################################
 
-def recursiveUpdate(group, value, groups):
-	for (line, groupIndex) in group[3]:
-		recursiveUpdate(groups[line][groupIndex], value, groups)
-	for (line, groupIndex) in group[4]:
-		groups[line][groupIndex][0] = value
-	group[0] = value
+def board_perform_move(board, move):
+	'''Given a board and a move performs the move on the given board and return the changed board.'''
+
+##############################################################
+#
+#	MAIN
+#
+##############################################################
+
+if (__name__ == "__main__"):
+
+	file = open("example1.in", "r")
+
+	contents = file.read()
+	length = len(contents)
+	board = []
+	row = []
+
+	for i in range(length):
+		if (contents.startswith("X",i, i+1)):
+			row.append("X")
+		if (contents.startswith("O", i, i+1)):
+			row.append("O")
+		if (contents.startswith("_",i, i+1)):
+			row.append("_")
+		if	(contents.startswith("],",i, i+2)):
+			board.append(row)
+			row = []
+		if	(contents.startswith("]]",i, i+2)):
+			board.append(row)
+
+	print("Initial board:")
+	print(board)
+
+	print("Possible moves:")
+	print(board_moves(board))
