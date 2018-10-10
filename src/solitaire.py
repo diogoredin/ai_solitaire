@@ -9,7 +9,7 @@ from search import *
 class sol_state():
 	'''Represents a solitaire board.'''
 
-	__slots__ = ('board',)
+	__slots__ = ['board']
 
 	def __init__(self, board):
 		self.board = board
@@ -29,7 +29,7 @@ class solitaire(Problem):
 		"""The constructor specifies the initial state, and possibly a goal
 		state, if there is a unique goal.  Your subclass's constructor can add
 		other arguments."""
-		super().__init__(sol_state(board))
+		super(sol_state(board))
 
 	def actions(self, state):
 		"""Return the actions that can be executed in the given
