@@ -133,7 +133,7 @@ function set_env {
 	cd "$DIR_exec"
 
 	if [ ! -d "$DIR_tests" ]; then
-		DIR_tests="$DIR_script/tests_mooshak"
+		DIR_tests="$DIR_script/tests_simple"
 		BOOL_recursive=true
 	fi
 }
