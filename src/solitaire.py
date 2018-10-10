@@ -61,7 +61,7 @@ class solitaire(Problem):
 		return len(board_moves(node.state.get_board()))
 
 	# Path cost
-	def path_cost(self, c, state1, action, state2)
+	def path_cost(self, c, state1, action, state2):
 		"""For optimization problems, each state has a value.  Hill-climbing
 		and related algorithms try to maximize this value."""
 		# TODO 
@@ -234,7 +234,7 @@ def board_perform_move(board, move):
 	'''Given a board and a move performs the move on the given board and returns the changed board.'''
 
 	# Creating a copy of the board
-	board_new = [board[i][:] for i in len(board)]
+	board_new = [board[i][:] for i in range(len(board))]
 
 	# Movement Positions
 	pos_initial = move_initial(move)
@@ -251,3 +251,13 @@ def board_perform_move(board, move):
 	put_pos(board_new, pos_final, c_peg())
 
 	return board_new
+
+board = [["_","O","O","O","_"],["O","_","O","_","O"],["_","O","_","O","_"],["O","_","O","_","_"],["_","O","_","_","_"]]
+print(board)
+moves = board_moves(board)
+print(moves)
+board = board_perform_move(board, moves[0])
+moves = board_moves(board)
+print(moves)
+print(board)
+
