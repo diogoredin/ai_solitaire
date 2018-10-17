@@ -10,7 +10,7 @@ from search import *
 class sol_state():
 	'''Represents a solitaire board.'''
 
-	__slots__ = ('board',)
+	__slots__ = ['board']
 
 	def __init__(self, board):
 		self.board = board
@@ -24,31 +24,48 @@ class sol_state():
 
 class solitaire(Problem):
 	'''Models a Solitaire problem as a satisfaction problem.
-		A solution can only have one piece left in the board.'''
+	A solution can only have one piece left in the board.'''
 
-	# State of the board
 	def __init__(self, board):
-		super().__init__(sol_state(board))
+		"""The constructor specifies the initial state, and possibly a goal
+		state, if there is a unique goal.  Your subclass's constructor can add
+		other arguments."""
+		super(sol_state(board))
 
-	# Retrieves a list of possible actions for the current board
 	def actions(self, state):
-		actions = list(filter(lambda x: len(x) > 1, board_moves(state.get_board())))
-		return actions
+		"""Return the actions that can be executed in the given
+		state. The result would typically be a list, but if there are
+		many actions, consider yielding them one at a time in an
+		iterator, rather than building them all at once."""
+		return board_moves(board)
 
-	# Make the specified move in the bdioard
 	def result(self, state, move):
+		"""Return the state that results from executing the given
+		action in the given state. The action must be one of
+		self.actions(state)."""
 		return sol_state(board_perform_move(state.get_board(), move))
 
-	# Return true if we reached our goal
 	def goal_test(self, state):
+		"""Return True if the state is a goal. The default method compares the
+		state to self.goal or checks for state in self.goal if it is a
+		list, as specified in the constructor. Override this method if
+		checking against a single self.goal is not enough."""
 		return board_solved(state.get_board())
 
 	# Heuristic (number of nodes available)
-	def h(self, peg):
-		return len(board_moves(peg.state.get_board()))
+	def h(self, node):
+		"""Return the cost of a solution path that arrives at state2 from
+		state1 via action, assuming cost c to get up to state1. If the problem
+		is such that the path doesn't matter, this function will only look at
+		state2.  If the path does matter, it will consider c and maybe state1
+		and action. The default method costs 1 for every step in the path."""
+		return len(board_moves(node.state.get_board()))
 
 	# Path cost
-	# def path_cost(self, c, state1, action, state2)
+	def path_cost(self, c, state1, action, state2):
+		"""For optimization problems, each state has a value.  Hill-climbing
+		and related algorithms try to maximize this value."""
+		# TODO 
 
 ##############################################################
 #
@@ -99,8 +116,8 @@ def put_pos(board, pos, content):
 
 # Returns the position between the two positions (if there is one)
 def mid_pos(pos_i, pos_j):
-	mid_line = int((pos_l(pos_j) - pos_l(pos_i)) / 2)
-	mid_column = int((pos_c(pos_j) - pos_c(pos_j)) / 2)
+	mid_line = (pos_l(pos_j) - pos_l(pos_i)) >> 1
+	mid_column = (pos_c(pos_j) - pos_c(pos_j)) >> 1
 
 	if (-1 <= mid_line <= 1) and (-1 <= mid_column <= 1):
 		return make_pos(mid_line + pos_l(pos_i), mid_column + pos_c(pos_i))
@@ -217,18 +234,31 @@ def board_moves(board):
 def board_perform_move(board, move):
 	'''Given a board and a move performs the move on the given board and returns the changed board.'''
 
+	# Creating a copy of the board
+	board_new = [board[i][:] for i in range(len(board))]
+
 	# Movement Positions
 	pos_initial = move_initial(move)
 	pos_final = move_final(move)
 
 	# Empty first position
-	put_pos(board, pos_initial, c_empty())
+	put_pos(board_new, pos_initial, c_empty())
 
 	# Empty middle position
 	pos_mid = mid_pos(pos_initial, pos_final)
-	put_pos(board, pos_mid, c_empty())
+	put_pos(board_new, pos_mid, c_empty())
 
-	# Fill pos_final piece
-	put_pos(board, pos_final, c_peg())
+	# Fill final position
+	put_pos(board_new, pos_final, c_peg())
 
-	return board
+	return board_new
+
+board = [["_","O","O","O","_"],["O","_","O","_","O"],["_","O","_","O","_"],["O","_","O","_","_"],["_","O","_","_","_"]]
+print(board)
+moves = board_moves(board)
+print(moves)
+board = board_perform_move(board, moves[0])
+moves = board_moves(board)
+print(moves)
+print(board)
+
