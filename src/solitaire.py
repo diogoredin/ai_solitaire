@@ -1,10 +1,11 @@
-from search import *
-
 ##############################################################
-#
+#	
 #	SOLITAIRE SOLVER
+#	IST IA 18/19 - GROUP TG017 JOAO NEVES 83405, DIOGO REDIN 84711
 #
 ##############################################################
+
+from search import *
 
 class sol_state():
 	'''Represents a solitaire board.'''

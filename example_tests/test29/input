@@ -1,0 +1,1 @@
+print(xx_invalid_solution([["O","O","O","X"],["O","O","O","O"],["O","_","O","O"],["O","O","O","O"]],depth_first_tree_search(solitaire([["O","O","O","X"],["O","O","O","O"],["O","_","O","O"],["O","O","O","O"]]))))
