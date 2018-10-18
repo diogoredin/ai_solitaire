@@ -1,5 +1,5 @@
 
-O que é que cada teste foca:
+O que e que cada teste foca:
 
 # Test 01 a 08 - board_moves
 
@@ -27,18 +27,17 @@ O que é que cada teste foca:
 
 # Test 27 - Depth First Search super simple with solution
 # Test 28 - Depth First Search super simple with no solution
-# Test 29 - Depth First Search 
-# Test 30 - Greedy search 
+# Test 29 - Depth First Search
+# Test 30 - Greedy search
 # Test 31 - A* 
 # Test 32 - A* 
 
-
-São usadas as seguintes funções cujo código não foi publicado:
+Sao usadas as seguintes funcoes cujo codigo nao foi publicado:
 
 1) xx_invalid_solution(<board>, <result of search>)
-   A função devolve False se o resultado da procura estiver correcto.
-   Senão a função devolve uma mensagem de erro que tenta mostrar o que falhou.
+   A funcao devolve False se o resultado da procura estiver correcto.
+   Sendo a funcao devolve uma mensagem de erro que tenta mostrar o que falhou.
    Por exemplo:
     - "A procura devia retornar um objecto do tipo Node e nao um do tipo <class 'int'> com valor 5"
     - "A accao 8 nao e valida <accao> A sequencia de accoes e: <seq de accoes>"
-    - "O tabuleiro nao tem só um pino: <board>"
+    - "O tabuleiro nao tem so um pino: <board>"

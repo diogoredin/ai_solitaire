@@ -18,9 +18,8 @@ class sol_state():
 	def get_board(self):
 		return self.board
 
-	# TODO less than method used for A* and other methods
 	def __lt__(self, otherState):
-		return 0
+		return False
 
 class solitaire(Problem):
 	'''Models a Solitaire problem as a satisfaction problem.
@@ -30,14 +29,14 @@ class solitaire(Problem):
 		"""The constructor specifies the initial state, and possibly a goal
 		state, if there is a unique goal.  Your subclass's constructor can add
 		other arguments."""
-		super(sol_state(board))
+		super().__init__(sol_state(board))
 
 	def actions(self, state):
 		"""Return the actions that can be executed in the given
 		state. The result would typically be a list, but if there are
 		many actions, consider yielding them one at a time in an
 		iterator, rather than building them all at once."""
-		return board_moves(board)
+		return board_moves(state.get_board())
 
 	def result(self, state, move):
 		"""Return the state that results from executing the given
@@ -117,7 +116,7 @@ def put_pos(board, pos, content):
 # Returns the position between the two positions (if there is one)
 def mid_pos(pos_i, pos_j):
 	mid_line = (pos_l(pos_j) - pos_l(pos_i)) >> 1
-	mid_column = (pos_c(pos_j) - pos_c(pos_j)) >> 1
+	mid_column = (pos_c(pos_j) - pos_c(pos_i)) >> 1
 
 	if (-1 <= mid_line <= 1) and (-1 <= mid_column <= 1):
 		return make_pos(mid_line + pos_l(pos_i), mid_column + pos_c(pos_i))
@@ -253,12 +252,11 @@ def board_perform_move(board, move):
 
 	return board_new
 
-board = [["_","O","O","O","_"],["O","_","O","_","O"],["_","O","_","O","_"],["O","_","O","_","_"],["_","O","_","_","_"]]
-print(board)
-moves = board_moves(board)
-print(moves)
-board = board_perform_move(board, moves[0])
-moves = board_moves(board)
-print(moves)
-print(board)
-
+# board = [["_","O","O","O","_"],["O","_","O","_","O"],["_","O","_","O","_"],["O","_","O","_","_"],["_","O","_","_","_"]]
+# print(board)
+# moves = board_moves(board)
+# print(moves)
+# board = board_perform_move(board, moves[0])
+# moves = board_moves(board)
+# print(moves)
+# print(board)
