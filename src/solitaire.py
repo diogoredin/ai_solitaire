@@ -19,7 +19,7 @@ class sol_state():
 		return self.board
 
 	def __lt__(self, otherState):
-		return False
+		return len(board_moves(otherState.get_board())) < len(board_moves(self.get_board()))
 
 class solitaire(Problem):
 	'''Models a Solitaire problem as a satisfaction problem.
@@ -62,7 +62,7 @@ class solitaire(Problem):
 
 	# Path cost
 	def path_cost(self, c, state1, action, state2):
-		"""For optimization problems, each state has a value.  Hill-climbing
+		"""For optimization problems, each state has a value. Hill-climbing
 		and related algorithms try to maximize this value."""
 		# TODO 
 
@@ -213,11 +213,11 @@ def board_moves(board):
 						moves.append(left)
 
 				if ( column < len(board[line]) - 2 ):
-
+					
+					# Right Movement
 					pos_middle = make_pos(pos_l(pos_initial), pos_c(pos_initial) + 1)
 					pos_final = make_pos(pos_l(pos_initial), pos_c(pos_initial) + 2)
 
-					# Right Movement
 					if ( is_peg(get_pos(board, pos_middle)) and is_empty(get_pos(board, pos_final)) ):
 						right = make_move(pos_initial, pos_final)
 						moves.append(right)
