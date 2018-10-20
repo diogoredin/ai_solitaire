@@ -57,6 +57,9 @@ class solitaire(Problem):
 		# Accumulated cost - SUM(manhattan distance of each peg to the center)
 		cost = 0
 
+		# Minimum cost so far
+		minCost = 0
+
 		# Run board and for each peg accumulate their distance to the center
 		for line in range(len(board)):
 			for column in range(len(board[line])):
@@ -67,7 +70,12 @@ class solitaire(Problem):
 					# Manhattan distance
 					cost += abs(column - mid_column) + abs(line - mid_line)
 
-		return cost
+					# Save minimum
+					if ( minCost > abs(column - mid_column) + abs(line - mid_line) ):
+						minCost = abs(column - mid_column) + abs(line - mid_line)
+
+		# If there is only one peg left heuristic should give 0 so we subtract the minimum cost (only one) so far
+		return cost - minCost
 
 ##############################################################
 #
