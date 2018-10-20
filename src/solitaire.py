@@ -19,7 +19,7 @@ class sol_state():
 		return self.board
 
 	def __lt__(self, otherState):
-		return len(board_moves(otherState.get_board())) < len(board_moves(self.get_board()))
+		return len(board_moves(self.get_board())) > len(board_moves(otherState.get_board()))
 
 class solitaire(Problem):
 	'''Models a Solitaire problem as a satisfaction problem.
@@ -58,7 +58,7 @@ class solitaire(Problem):
 		is such that the path doesn't matter, this function will only look at
 		state2.  If the path does matter, it will consider c and maybe state1
 		and action. The default method costs 1 for every step in the path."""
-		return len(board_moves(node.state.get_board()))
+		return 0
 
 	# Path cost
 	def path_cost(self, c, state1, action, state2):
