@@ -1,7 +1,7 @@
 ##############################################################
 #	
 #	SOLITAIRE SOLVER
-#	IST IA 18/19 - GROUP TG017 JOAO NEVES 83405, DIOGO REDIN 84711
+#	IST IA 18/19 - GROUP TP017 JOAO NEVES 83405, DIOGO REDIN 84711
 #
 ##############################################################
 
@@ -26,45 +26,48 @@ class solitaire(Problem):
 	A solution can only have one piece left in the board.'''
 
 	def __init__(self, board):
-		"""The constructor specifies the initial state, and possibly a goal
-		state, if there is a unique goal.  Your subclass's constructor can add
-		other arguments."""
 		super().__init__(sol_state(board))
 
 	def actions(self, state):
-		"""Return the actions that can be executed in the given
-		state. The result would typically be a list, but if there are
-		many actions, consider yielding them one at a time in an
-		iterator, rather than building them all at once."""
+		'''Returns all possible next states for the state we are in.'''
 		return board_moves(state.get_board())
 
 	def result(self, state, move):
-		"""Return the state that results from executing the given
-		action in the given state. The action must be one of
-		self.actions(state)."""
+		'''Applies a given move to the current board.'''
 		return sol_state(board_perform_move(state.get_board(), move))
 
 	def goal_test(self, state):
-		"""Return True if the state is a goal. The default method compares the
-		state to self.goal or checks for state in self.goal if it is a
-		list, as specified in the constructor. Override this method if
-		checking against a single self.goal is not enough."""
+		'''Board is solved if it has only one piece left.'''
 		return board_solved(state.get_board())
 
-	# Heuristic (number of nodes available)
 	def h(self, node):
-		"""Return the cost of a solution path that arrives at state2 from
-		state1 via action, assuming cost c to get up to state1. If the problem
-		is such that the path doesn't matter, this function will only look at
-		state2.  If the path does matter, it will consider c and maybe state1
-		and action. The default method costs 1 for every step in the path."""
-		return 0
+		'''This heuristic prefers states that have more pegs closer to the 
+		center. We sum the manhattan distance of all pegs to the center of the board -
+		the higher this sum is, the further we are from the solution.'''
 
-	# Path cost
-	def path_cost(self, c, state1, action, state2):
-		"""For optimization problems, each state has a value. Hill-climbing
-		and related algorithms try to maximize this value."""
-		# TODO 
+		# Board and size
+		board = node.state.get_board()
+		lines = len(board)
+		columns = len(board[0])
+
+		# Center
+		mid_line = lines >> 1
+		mid_column = columns >> 1
+
+		# Accumulated cost - SUM(manhattan distance of each peg to the center)
+		cost = 0
+
+		# Run board and for each peg accumulate their distance to the center
+		for line in range(len(board)):
+			for column in range(len(board[line])):
+
+				pos = get_pos(board, make_pos(line, column))
+				if(is_peg(pos)):
+
+					# Manhattan distance
+					cost += abs(column - mid_column) + abs(line - mid_line)
+
+		return cost
 
 ##############################################################
 #
@@ -96,12 +99,15 @@ def is_blocked(e):
 #
 ##############################################################
 
+# Makes a tuple position
 def make_pos(l, c):
 	return (l, c)
 
+# Returns the position line
 def pos_l(pos):
 	return pos[0]
 
+# Returns the position column
 def pos_c(pos):
 	return pos[1]
 
@@ -144,15 +150,14 @@ def move_final(move):
 ##############################################################
 
 def board_solved(board):
-	'''Given a board finds if the board is solved.'''
+	'''Given a board finds if the board is solved. The board is solved if it has only one peg.'''
 
-	# Counter
+	# Number of pegs in the board
 	counter = 0
 
-	# Iterate the board
 	for line in range (len(board)):
-
 		for column in range (len(board[line])):
+
 			pos = make_pos(line, column)
 			if is_peg (get_pos(board, pos)):
 				counter += 1
@@ -163,7 +168,7 @@ def board_solved(board):
 
 ##############################################################
 #
-#	BOARD MOVES - Function for solitaire class
+#	BOARD MOVES - Function for the solitaire class.
 #
 ##############################################################
 
@@ -173,13 +178,11 @@ def board_moves(board):
 	# Possible moves on the board
 	moves = []
 
-	# Iterate the board
 	for line in range(len(board)):
 		for column in range(len(board[line])):
 
 			# If the position contains a piece calculate possible moves here
 			pos_initial = make_pos(line, column)
-
 			if is_peg(get_pos(board, pos_initial)):
 
 				if ( line < len(board) - 2):
@@ -226,7 +229,7 @@ def board_moves(board):
 
 ##############################################################
 #
-#	BOARD PERFORM MOVE - Function for solitaire class
+#	BOARD PERFORM MOVE - Function for the solitaire class.
 #
 ##############################################################
 
@@ -251,12 +254,3 @@ def board_perform_move(board, move):
 	put_pos(board_new, pos_final, c_peg())
 
 	return board_new
-
-# board = [["_","O","O","O","_"],["O","_","O","_","O"],["_","O","_","O","_"],["O","_","O","_","_"],["_","O","_","_","_"]]
-# print(board)
-# moves = board_moves(board)
-# print(moves)
-# board = board_perform_move(board, moves[0])
-# moves = board_moves(board)
-# print(moves)
-# print(board)
