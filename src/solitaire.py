@@ -48,12 +48,26 @@ class solitaire(Problem):
 
 		# Accumulated cost
 		cost = 0
+<<<<<<< HEAD
 		# Run board and for each peg accumulate their heuristic value
+=======
+
+		# Run board and for each peg accumulate their distance to the center
+>>>>>>> parent of b645b72... Fixed heuristic
 		for line in range(len(board)):
 			for column in range(len(board[line])):
 				if is_peg(board[line][column]):
 					cost += find_neighbor_peg(board, make_pos(line, column))
 
+<<<<<<< HEAD
+=======
+				pos = get_pos(board, make_pos(line, column))
+				if(is_peg(pos)):
+
+					# Manhattan distance
+					cost += abs(column - mid_column) + abs(line - mid_line)
+
+>>>>>>> parent of b645b72... Fixed heuristic
 		return cost
 
 ##############################################################
