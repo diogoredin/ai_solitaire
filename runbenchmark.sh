@@ -146,7 +146,6 @@ function set_env {
 
 # Target functionality
 search_algorithms=(
-"depth_first_tree_search"
 "greedy_best_first_graph_search"
 "astar_search"
 )

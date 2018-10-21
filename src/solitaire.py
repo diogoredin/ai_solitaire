@@ -5,6 +5,7 @@
 #
 ##############################################################
 
+import sys
 from search import *
 
 class sol_state():
@@ -58,7 +59,7 @@ class solitaire(Problem):
 		cost = 0
 
 		# Minimum cost so far
-		minCost = 0
+		minCost = sys.maxsize
 
 		# Run board and for each peg accumulate their distance to the center
 		for line in range(len(board)):
@@ -74,7 +75,7 @@ class solitaire(Problem):
 					if ( minCost > abs(column - mid_column) + abs(line - mid_line) ):
 						minCost = abs(column - mid_column) + abs(line - mid_line)
 
-		# If there is only one peg left heuristic should give 0 so we subtract the minimum cost (only one) so far
+		# If there is only one peg left heuristic should gcive 0 so we subtract the minimum cost (only one) so far
 		return cost - minCost
 
 ##############################################################
