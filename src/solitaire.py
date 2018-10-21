@@ -54,9 +54,6 @@ class solitaire(Problem):
 		mid_line = lines >> 1
 		mid_column = columns >> 1
 
-		# Accumulated cost - SUM(manhattan distance of each peg to the center)
-		cost = 0
-
 		# Minimum cost so far
 		minCost = 0
 
