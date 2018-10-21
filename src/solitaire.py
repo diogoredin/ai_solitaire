@@ -6,7 +6,7 @@
 ##############################################################
 
 from search import *
-import sys
+
 class sol_state():
 	'''Represents a solitaire board.'''
 
@@ -41,20 +41,41 @@ class solitaire(Problem):
 		return board_solved(state.get_board())
 
 	def h(self, node):
-		'''This heuristic prefers states that have pegs in lines separated
-		by one space.'''
+		'''This heuristic prefers states that have more pegs closer to the 
+		center. We sum the manhattan distance of all pegs to the center of the board -
+		the higher this sum is, the further we are from the solution.'''
 
+		# Board and size
 		board = node.state.get_board()
+		lines = len(board)
+		columns = len(board[0])
 
-		# Accumulated cost
+		# Center
+		mid_line = lines >> 1
+		mid_column = columns >> 1
+
+		# Accumulated cost - SUM(manhattan distance of each peg to the center)
 		cost = 0
-		# Run board and for each peg accumulate their heuristic value
+
+		# Minimum cost so far
+		minCost = 0
+
+		# Run board and for each peg accumulate their distance to the center
 		for line in range(len(board)):
 			for column in range(len(board[line])):
-				if is_peg(board[line][column]):
-					cost += find_neighbor_peg(board, make_pos(line, column))
 
-		return cost
+				pos = get_pos(board, make_pos(line, column))
+				if(is_peg(pos)):
+
+					# Manhattan distance
+					cost += abs(column - mid_column) + abs(line - mid_line)
+
+					# Save minimum
+					if ( minCost > abs(column - mid_column) + abs(line - mid_line) ):
+						minCost = abs(column - mid_column) + abs(line - mid_line)
+
+		# If there is only one peg left heuristic should give 0 so we subtract the minimum cost (only one) so far
+		return cost - minCost
 
 ##############################################################
 #
@@ -113,35 +134,6 @@ def mid_pos(pos_i, pos_j):
 
 	if (-1 <= mid_line <= 1) and (-1 <= mid_column <= 1):
 		return make_pos(mid_line + pos_l(pos_i), mid_column + pos_c(pos_i))
-
-# The main heuristic function. It penalizes isolated pegs and benefits pegs in the same line
-# or column, separated by one space.
-def find_neighbor_peg(board, pos):
-	neighbors = [
-		( 0, 1),
-		( 0,-1),
-		( 1, 0),
-		(-1, 0),
-		( 0, 2),
-		( 0,-2),
-		( 2, 0),
-		(-2, 0),
-	]
-	val = 0
-	for neighbor in neighbors:
-		if  valid_pos(board, (pos_l(pos) + neighbor[0], pos_c(pos) + neighbor[1])) and is_peg(board[pos_l(pos) + neighbor[0]][pos_c(pos) + neighbor[1]]):
-			if max(abs(pos_l(pos) + neighbor[0]), abs(pos_l(pos) + neighbor[0])) == 2:
-				val += 1
-			elif  max(abs(pos_l(pos) + neighbor[0]), abs(pos_l(pos) + neighbor[0])) == 1:
-				val += 2
-			else:
-				val += 3
-	return val
-
-# Returns whether or not a position exists in a given board
-
-def valid_pos(board, pos):
-	return 0 <= pos_l(pos) < len(board) and 0 <= pos_c(pos) < len(board[0]) and not is_blocked(get_pos(board, pos))
 
 ##############################################################
 #

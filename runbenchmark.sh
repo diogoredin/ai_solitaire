@@ -29,14 +29,17 @@ readonly Err="${BRed}Error${Red}:${RCol}"
 
 readonly ScriptName="$0"
 
+# Python printing line to use with our tests
+readonly print_msg="print(\"n actions: \" + str(problem.succs) + \"  n result: \" + str(problem.states) + \"  n goal_test: \" + str(problem.goal_tests))"
+
 # String Arrays
 readonly usage_content=( "Usage: $(basename $ScriptName)"
 "HELP:
 	-h : Shows this message"
-"DIRECTORIES:
-	-t : Set tests directory"
+"FILES & DIRECTORIES:
+	-d : Set tests directory
+	-t : Set the single test to run"
 "OPTIONS:
-	-r : If -t was set, then -r sets recursivity of the given directory
 	--show-all : Prints successes as well"
 )
 
@@ -68,10 +71,15 @@ function parse_args {
 
 	while [ $# -gt 0 ]; do
 		case $1 in
-			# DIRECTORIES
-			-t )
+			# FILES & DIRECTORIES
+			-d )
 				shift
 				DIR_tests="$(get_absolute_dir "$1")"
+				;;
+			-t )
+				shift
+				DIR_tests="$(get_absolute_dir "$(dirname $1)")"
+				FILE_testName="$DIR_tests/$(basename $1)"
 				;;
 			# OPTIONS
 			--show-all )
@@ -132,13 +140,45 @@ function set_env {
 	fi
 	cd "$DIR_exec"
 
-	if [ ! -d "$DIR_tests" ]; then
-		DIR_tests="$DIR_script/tests_mooshak"
-		BOOL_recursive=true
-	fi
+	# Defining tests
+	DIR_tests="$DIR_script/tests_benchmark"
 }
 
 # Target functionality
+search_algorithms=(
+"depth_first_tree_search"
+"greedy_best_first_graph_search"
+"astar_search"
+)
+
+function test_single {
+	# $1 : test to run
+	local test_input="$1"
+	local test_errors="${test_input%.in}.log"
+	local error=0
+
+	local board="$(cat $test_input)"
+
+	for algo in ${search_algorithms[@]}; do
+		print_progress "Running $algo over $test_input..."
+		local test_output="${test_input%.in}.$algo.outhyp"
+
+		local cmd=""
+		if [ $(echo $algo | grep "greedy_best_first_graph_search") ]; then
+			cmd="problem = InstrumentedProblem(solitaire($board)); $algo(problem, problem.h); $print_msg"
+		else
+			cmd="problem = InstrumentedProblem(solitaire($board)); $algo(problem); $print_msg"
+		fi
+
+		time python3 -c "from solitaire import *; $cmd" > "$test_output" 2> "$test_errors"
+		error=$?
+		if [ $error -ne 0 ]; then
+			print_failure "Runtime error. Check $test_errors"
+			exit
+		fi
+	done
+}
+
 function test_dir {
 	# $1 : test directory
 	if [ $# -lt 1 ]; then
@@ -147,34 +187,18 @@ function test_dir {
 	elif [ ! -d "$1" ]; then
 		print_error "Given argument is not a directory."
 		return $RET_error
-	elif [ -z "$(ls $1/input 2> /dev/null)" -o -z "$(ls $1/output 2> /dev/null)" ]; then
+	elif [ -z "$(ls $1/*.in 2> /dev/null)" ]; then
 		print_error "Given directory does not contain any test files."
 		return $RET_error
 	fi
 
 	# Run tests
-	local test_name="$1/input"
-	local test_output="$1/output"
-	local test_outhyp="$1/outhyp"
-	local test_errors="$1/errors.log"
-	local test_diff="$1/result.diff"
-
-	python3 -c "from solitaire import *; $(cat $test_name)" > "$test_outhyp" 2> "$test_errors"
-	local error=$?
-    diff $test_output $test_outhyp > $test_diff
-	if [ $error -ne 0 ]; then
-		print_failure "Runtime error. Check errors.log"
-		return 1
-	elif [ -s $test_diff ]; then
-        print_failure "Wrong answer. Check result.diff"
-		return 2
-    else
-		if [ $BOOL_showAll == true ]; then
-			print_success "$test_name"
-		fi
-        rm -f *.diff $test_outhyp
-    fi
-
+	for i in $(seq 5); do
+		for test_input in $1/*.in; do
+			test_single $test_input
+			echo "__________________________________"
+		done
+	done
 	return 0
 }
 
@@ -192,38 +216,17 @@ function main {
 	fi
 
 	local retval=$RET_success
-	local fail_count=0
 
-	if [ $BOOL_recursive == true ]; then
-		local error=0
-		local runtime_error=0
-		local wrong_answer=0
-
-		for x in $DIR_tests/*/; do
-			print_progress "Running through \"$x\""
-			test_dir "$x"
-			error=$?
-			if [ $error -eq 1 ]; then
-				runtime_error=$(($runtime_error + 1))
-			elif [ $error -eq 2 ]; then
-				wrong_answer=$(($wrong_answer + 1))
-			fi
-			total_count=$(($total_count + 1))
-		done
-
-		fail_count=$(($runtime_error + $wrong_answer))
-
-		if [ $fail_count -gt 0 ]; then
-			print_failure "\n$runtime_error Runtime Errors\n$wrong_answer Wrong Answers"
-			printf "Total: $fail_count / $total_count tests.\n"
-		fi
-	else
+	if [ -z "$FILE_testName" ]; then
 		test_dir "$DIR_tests"
-		fail_count=$?
+		retval=$?
+	else
+		test_single "$FILE_testName"
+		retval=$?
 	fi
-	cleanup
 
-	exit $fail_count
+	cleanup
+	exit $retval
 }
 
 # Script starts HERE
