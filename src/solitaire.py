@@ -141,7 +141,7 @@ def find_neighbor_peg(board, pos):
 # Returns whether or not a position exists in a given board
 
 def valid_pos(board, pos):
-	return 0 <= pos_l(pos) < len(board) and 0 <= pos_c(pos) < len(board[0])
+	return 0 <= pos_l(pos) < len(board) and 0 <= pos_c(pos) < len(board[0]) and not is_blocked(get_pos(board, pos))
 
 ##############################################################
 #
